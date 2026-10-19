@@ -1,0 +1,113 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile with display name and timestamps",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "displayName", "email", "createdAt", "updatedAt"]
+    },
+    "Meeting": {
+      "title": "User Meeting History",
+      "description": "Historical record of past calls joined or hosted by a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "roomId": { "type": "string" },
+        "title": { "type": "string" },
+        "joinedAt": { "type": "string", "format": "date-time" },
+        "durationMinutes": { "type": "integer" }
+      },
+      "required": ["userId", "roomId", "title", "joinedAt", "durationMinutes"]
+    },
+    "Room": {
+      "title": "Call Room",
+      "description": "Video conference room session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "hostId": { "type": "string" },
+        "hostName": { "type": "string" },
+        "title": { "type": "string" },
+        "status": { "type": "string", "enum": ["waiting", "active", "ended"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "hostId", "hostName", "title", "status", "createdAt", "updatedAt"]
+    },
+    "Participant": {
+      "title": "Room Participant",
+      "description": "Active participant state within a meeting room",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "isAudioMuted": { "type": "boolean" },
+        "isVideoOff": { "type": "boolean" },
+        "isHost": { "type": "boolean" },
+        "joinedAt": { "type": "string", "format": "date-time" },
+        "lastSeen": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "displayName", "isAudioMuted", "isVideoOff", "isHost", "joinedAt", "lastSeen"]
+    },
+    "Signal": {
+      "title": "WebRTC Signal",
+      "description": "Offer, answer, candidate, or sync signal exchanged between peers",
+      "type": "object",
+      "properties": {
+        "fromUserId": { "type": "string" },
+        "toUserId": { "type": "string" },
+        "type": { "type": "string", "enum": ["offer", "answer", "candidate", "leave", "heartbeat"] },
+        "payload": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fromUserId", "toUserId", "type", "payload", "createdAt"]
+    },
+    "Message": {
+      "title": "In-Room Chat Message",
+      "description": "Text message sent in meeting chat",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "roomId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "roomId", "senderId", "senderName", "text", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profile information"
+    },
+    "/users/{userId}/meetings/{meetingId}": {
+      "schema": { "$ref": "#/entities/Meeting" },
+      "description": "User meeting history"
+    },
+    "/rooms/{roomId}": {
+      "schema": { "$ref": "#/entities/Room" },
+      "description": "Video call room session"
+    },
+    "/rooms/{roomId}/participants/{userId}": {
+      "schema": { "$ref": "#/entities/Participant" },
+      "description": "Live participants in room"
+    },
+    "/rooms/{roomId}/signals/{signalId}": {
+      "schema": { "$ref": "#/entities/Signal" },
+      "description": "Signaling messages for peer negotiation"
+    },
+    "/rooms/{roomId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "In-call chat messages"
+    }
+  }
+}

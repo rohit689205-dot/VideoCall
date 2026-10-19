@@ -1,0 +1,6 @@
+{
+  "name": "VideoCall",
+  "description": "Real-time video conferencing app with instant room creation, lobby previews, multi-participant video grid, and in-call chat.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

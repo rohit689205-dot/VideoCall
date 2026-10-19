@@ -1,0 +1,6 @@
+{
+  "summary": "Architectural and implementation plan for a native Android screen and audio recording service using MediaProjection, MediaRecorder, ForegroundService, and MediaStore for VideoCall.",
+  "updatedAt": "2026-10-18T12:46:18.812464242Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">VideoCall</string>
+    <string name="welcome_headline">Connect face-to-face from anywhere</string>
+    <string name="welcome_subtitle">Crystal-clear video conferencing with real-time audio, lobby preview, dynamic multi-participant grid, and in-room chat.</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="new_meeting">New Meeting</string>
+    <string name="join_meeting">Join Meeting</string>
+    <string name="enter_meeting_code">Enter room code (e.g. vid-839-201)</string>
+    <string name="start_instant_meeting">Start Instant Meeting</string>
+    <string name="join_now">Join Now</string>
+    <string name="ready_to_join">Ready to join?</string>
+    <string name="leave_call">Leave Call</string>
+    <string name="end_meeting">End Meeting</string>
+    <string name="camera_permission_required">Camera &amp; Microphone permission required to connect your call.</string>
+    <string name="grant_permissions">Grant Permissions</string>
+    <string name="in_call_chat">In-Call Chat</string>
+    <string name="participants">Participants</string>
+    <string name="meeting_ended">Meeting Ended</string>
+    <string name="meeting_ended_sub">Thank you for using VideoCall. You can rejoin or return to your dashboard.</string>
+    <string name="rejoin">Rejoin</string>
+    <string name="back_to_home">Back to Dashboard</string>
+    <string name="continue_as_guest">Continue as Guest</string>
+</resources>

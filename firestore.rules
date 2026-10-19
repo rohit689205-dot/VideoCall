@@ -1,0 +1,112 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['userId', 'displayName', 'email', 'createdAt', 'updatedAt']) &&
+             data.userId == request.auth.uid &&
+             data.displayName is string && data.displayName.size() > 0 &&
+             data.email is string &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidMeeting(data) {
+      return data.keys().hasAll(['userId', 'roomId', 'title', 'joinedAt', 'durationMinutes']) &&
+             data.userId == request.auth.uid &&
+             data.roomId is string && data.roomId.size() > 0 &&
+             data.title is string &&
+             data.joinedAt is timestamp && data.joinedAt <= request.time &&
+             data.durationMinutes is int;
+    }
+
+    function isValidRoom(data) {
+      return data.keys().hasAll(['id', 'hostId', 'hostName', 'title', 'status', 'createdAt', 'updatedAt']) &&
+             data.id is string && data.id.size() > 0 &&
+             data.hostId is string &&
+             data.hostName is string &&
+             data.title is string &&
+             data.status in ['waiting', 'active', 'ended'] &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidParticipant(data) {
+      return data.keys().hasAll(['userId', 'displayName', 'isAudioMuted', 'isVideoOff', 'isHost', 'joinedAt', 'lastSeen']) &&
+             data.userId == request.auth.uid &&
+             data.displayName is string &&
+             data.isAudioMuted is bool &&
+             data.isVideoOff is bool &&
+             data.isHost is bool &&
+             data.joinedAt is timestamp && data.joinedAt <= request.time &&
+             data.lastSeen is timestamp && data.lastSeen <= request.time;
+    }
+
+    function isValidSignal(data) {
+      return data.keys().hasAll(['fromUserId', 'toUserId', 'type', 'payload', 'createdAt']) &&
+             data.fromUserId == request.auth.uid &&
+             data.toUserId is string &&
+             data.type in ['offer', 'answer', 'candidate', 'leave', 'heartbeat'] &&
+             data.payload is string &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['id', 'roomId', 'senderId', 'senderName', 'text', 'timestamp']) &&
+             data.senderId == request.auth.uid &&
+             data.roomId is string &&
+             data.senderName is string &&
+             data.text is string && data.text.size() > 0 && data.text.size() <= 2000 &&
+             data.timestamp is timestamp && data.timestamp <= request.time;
+    }
+
+    // User profile documents
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
+      allow delete: if isOwner(userId);
+
+      // User meeting history
+      match /meetings/{meetingId} {
+        allow read, write: if isOwner(userId) && (request.method == 'delete' || isValidMeeting(request.resource.data));
+      }
+    }
+
+    // Call Rooms
+    match /rooms/{roomId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.hostId == request.auth.uid && isValidRoom(request.resource.data);
+      allow update: if isSignedIn() && (resource.data.hostId == request.auth.uid || request.resource.data.hostId == resource.data.hostId) && isValidRoom(request.resource.data);
+      allow delete: if isSignedIn() && resource.data.hostId == request.auth.uid;
+
+      // Active room participants
+      match /participants/{userId} {
+        allow read: if isSignedIn();
+        allow create, update: if isOwner(userId) && isValidParticipant(request.resource.data);
+        allow delete: if isOwner(userId) || (get(/databases/$(database)/documents/rooms/$(roomId)).data.hostId == request.auth.uid);
+      }
+
+      // Signaling channels for WebRTC peer connections
+      match /signals/{signalId} {
+        allow read: if isSignedIn() && (resource.data.toUserId == request.auth.uid || resource.data.toUserId == 'broadcast' || resource.data.fromUserId == request.auth.uid);
+        allow create: if isSignedIn() && isValidSignal(request.resource.data);
+        allow update, delete: if isSignedIn() && resource.data.fromUserId == request.auth.uid;
+      }
+
+      // In-call chat messages
+      match /messages/{messageId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && isValidMessage(request.resource.data);
+        allow update, delete: if isSignedIn() && resource.data.senderId == request.auth.uid;
+      }
+    }
+  }
+}
